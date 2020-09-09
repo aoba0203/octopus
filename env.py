@@ -47,4 +47,5 @@ class Env:
     next_state = self.__getNextState()
     reward = self.__calcReward(_list_dic_action)
     done = self.__isDone()
+    
     return next_state, reward, done
