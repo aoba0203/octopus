@@ -2,7 +2,14 @@ from genericpath import exists
 import os
 from os import makedirs
 from pathlib import Path
+import multiprocessing
 from . import utils
+
+KEY_DATA_TARGET_NUM = 'num'
+
+KEY_ACTION_DAY = 'day'
+KEY_ACTION_NUM = 'target_num'
+KEY_ACTION_VALUE = 'action'
 
 def getProjectRootPath():
   file = Path(os.path.abspath('definitions.py'))
@@ -34,3 +41,7 @@ def getDataProcessedPath():
 #   if not os.path.exists(_path):
 #     os.makedirs(_path)
 #   return _path
+
+def getNumberOfCore():
+  cpuCount = multiprocessing.cpu_count()
+  return np.minimum(4, cpuCount)

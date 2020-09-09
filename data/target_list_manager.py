@@ -11,6 +11,9 @@ class TargetManager:
     path_target = os.path.join(dir_target, TARGET_FILE_NAME)
     self.df_target = pd.read_csv(path_target, names=['num','name'], dtype={'num':str})
   
+  def getTargetList(self):
+    return list(self.df_target['num'].values)
+
   def getTargetName(self, _target_num):
     return self.df_target[self.df_target.num == _target_num].name.values[0]
 
