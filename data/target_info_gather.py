@@ -120,8 +120,7 @@ class TargetInfoGather:
     # path_csv_file = os.path.join(self.path_raw, _stock_num + '.csv')
     df_result.to_csv(path_csv_file)
   
-  def __save_update_target_info(self, _stock_num):
-    print('__save_update_target_info')
+  def save_update_target_info(self, _stock_num):
     stock_num = _stock_num.rjust(6, '0')    
     try:
       if not os.path.exists(os.path.join(self.path_raw, _stock_num + '.csv')):
@@ -138,14 +137,12 @@ class TargetInfoGather:
         print(e)
     return
 
-  def save_and_updates_target_info(self):
-    print('save_and_updates_target_info')
-    pool = Pool()
+  def save_and_updates_target_info(self):    
     for target_num in self.list_target:
     #   print(target_num)
     #   t = threading.Thread(target=self.__save_update_target_info, args=(target_num,))
     #   t.start()
-      self.__save_update_target_info(target_num)
+      self.save_update_target_info(target_num)
     # for i, _ in enumerate(pool.map(self.__save_update_target_info, self.list_target)):
     #     pass
     

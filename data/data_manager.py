@@ -6,6 +6,13 @@ from multiprocessing import Pool
 from utils import definitions
 from utils.definitions import KEY_DATA_TARGET_NUM, KEY_DATA_TARGET_NAME
 
+def __parallel_dataset(_target_num):  
+  info_gather = target_info_gather.TargetInfoGather([_target_num])  
+  info_gather.save_and_updates_target_info()
+  info_process = target_info_process.TargetInfoProcess()
+  info_process.write_extra_info_by_list(_target_num)
+
+
 class DataManager:
   def __init__(self):
     self.target_list = target_list_manager.TargetManager()
@@ -31,9 +38,13 @@ class DataManager:
   
   def makeDataset(self):    
     print('START - save_and_updates_target_info')
-    self.info_gather.save_and_updates_target_info()
+    self.info_gather.save_and_updates_target_info()    
     print('START - write_extra_info_by_list')
     self.info_process.write_extra_info_by_list(self.target_num_list)
-    
+  
+  def makeDatasetParallel(self):
+    cpus = definitions.getNumberOfCore()
+    with Pool(cpus) as p:
+        p.map(__parallel_dataset, self.target_num_list)
 
     
