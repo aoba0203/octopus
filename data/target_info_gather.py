@@ -77,11 +77,9 @@ class TargetInfoGather:
     target_demand = []
 #     last_page_num = __get_last_page_num_demand(stock_num)
     for page_num in range(1, (_last_page_num * 2)):
-      print(str(page_num) + '/' + str((_last_page_num * 2)))
       parsed_info = self.__get_parse_target_info(_stock_num, str(page_num))
       target_info.extend(parsed_info)
     for page_num in range(1, _last_page_num):
-      print(str(page_num) + '/' + str(_last_page_num))
       parsed_demand = self.__parse_target_demand(_stock_num, str(page_num))
       target_demand.extend(parsed_demand)    
     df_info = pd.DataFrame(target_info)

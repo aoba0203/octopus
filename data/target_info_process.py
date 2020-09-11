@@ -49,6 +49,9 @@ class TargetInfoProcess:
     return pd.DataFrame(data_list, columns=columns)
 
   def write_extra_infos(self, _stock_num):
+    path_file_processed = os.path.join(self.path_processed, _stock_num + '.csv')
+    if os.path.exists(path_file_processed):
+      return
     df_day_list =[]
     try:
       file_path = os.path.join(self.path_raw, _stock_num + '.csv')
@@ -76,7 +79,7 @@ class TargetInfoProcess:
         return
       df_result = pd.concat(df_day_list)
       df_result = df_result.reset_index().drop_duplicates(subset='index', keep='first').set_index('index')
-      df_result.to_csv(os.path.join(self.path_processed, _stock_num + '.csv'))
+      df_result.to_csv(path_file_processed)
     except Exception as e:
       print('Except: __new_write_seperate_day_dataframe = ', _stock_num)
       print(e)
