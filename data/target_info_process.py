@@ -73,10 +73,10 @@ class TargetInfoProcess:
         df_day_list.append(df_s)
       if len(df_day_list) == 0:
         print('len(df_day_list) == 0')
-        return      
+        return
       df_result = pd.concat(df_day_list)
       df_result = df_result.reset_index().drop_duplicates(subset='index', keep='first').set_index('index')
-      df_result.to_csv(file_path)
+      df_result.to_csv(os.path.join(self.path_processed, _stock_num + '.csv'))
     except Exception as e:
       print('Except: __new_write_seperate_day_dataframe = ', _stock_num)
       print(e)

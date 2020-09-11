@@ -6,6 +6,7 @@ import multiprocessing
 from . import utils
 
 KEY_DATA_TARGET_NUM = 'num'
+KEY_DATA_TARGET_NAME = 'target'
 
 KEY_ACTION_DAY = 'day'
 KEY_ACTION_NUM = 'target_num'
