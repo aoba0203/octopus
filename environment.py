@@ -35,7 +35,7 @@ class Environment:
       day = dic_action[KEY_ACTION_DAY]
       num = dic_action[KEY_ACTION_NUM]
       action = dic_action[KEY_ACTION_VALUE]
-      if action > 0.5:
+      if action == 1:
         df_day = self.df.loc[[day]]
         reward += df_day[df_day[KEY_DATA_TARGET_NUM] == num]['target'].values[0]
     if reward == 0:

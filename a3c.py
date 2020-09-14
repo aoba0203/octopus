@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import torch.multiprocessing as mp
+from torch.distributions import Categorical
 import time
 
 import numpy as np
@@ -28,14 +29,14 @@ class ActorCritic(nn.Module):
     self.fc1 = nn.Linear(336, 512)
     self.fc2 = nn.Linear(512, 256)
     self.fc3 = nn.Linear(256, 32)
-    self.fc_pi = nn.Linear(32, 1)
+    self.fc_pi = nn.Linear(32, 2)
     self.fc_v = nn.Linear(32, 1)
   
   def pi(self, x):
     x = F.relu(self.fc1(x))
     x = F.relu(self.fc2(x))
     x = F.relu(self.fc3(x))
-    pi = F.sigmoid(self.fc_pi(x))
+    pi = F.softmax(self.fc_pi(x))
     return pi
   
   def v(self, x):
@@ -61,11 +62,13 @@ def train(global_model, rank):
       for t in range(update_interval):
         df_target = s[s[KEY_DATA_TARGET_NUM] == num_target]
         df_target = df_target.drop([KEY_DATA_TARGET_NUM], axis=1)
+        if len(list(df_target.values)) == 0:
+          continue
         inputs = np.array(list(df_target.values)[0])
         day_target = list(df_target.index)[0]
         prob = local_model.pi(torch.from_numpy(inputs).float())
-        a = prob.item()
-        action = [{KEY_ACTION_DAY: day_target, KEY_ACTION_NUM: num_target, KEY_ACTION_VALUE: prob.item()}]
+        a = Categorical(prob).sample().item()
+        action = [{KEY_ACTION_DAY: day_target, KEY_ACTION_NUM: num_target, KEY_ACTION_VALUE: a}]
         s_prime, r, done = env.step(action)
 
         s_list.append(inputs)
@@ -77,6 +80,8 @@ def train(global_model, rank):
           break
       df_target = s[s[KEY_DATA_TARGET_NUM] == num_target]
       df_target = df_target.drop([KEY_DATA_TARGET_NUM], axis=1)
+      if len(list(df_target.values)[0])==0:
+        break
       inputs = np.array(list(df_target.values)[0])
       s_final = torch.tensor(torch.from_numpy(inputs), dtype=torch.float)
       R = 0.0 if done else local_model.v(s_final).item()
@@ -111,14 +116,16 @@ def test(global_model):
     while not done:
       df_target = s[s[KEY_DATA_TARGET_NUM] == num_target]
       df_target = df_target.drop([KEY_DATA_TARGET_NUM], axis=1)
+      if len(list(df_target.values)) == 0:
+        break
       inputs = np.array(list(df_target.values)[0])
       day_target = list(df_target.index)[0]
       prob = global_model.pi(torch.from_numpy(inputs).float())
-      a = prob.item()
-      action = [{KEY_ACTION_DAY: day_target, KEY_ACTION_NUM: num_target, KEY_ACTION_VALUE: prob.item()}]
+      a = Categorical(prob).sample().item()
+      action = [{KEY_ACTION_DAY: day_target, KEY_ACTION_NUM: num_target, KEY_ACTION_VALUE: a}]
       s_prime, r, done = env.step(action)
-      if n_epi % print_interval == 0 and n_epi != 0:
-        print(day_target, ': ', action, ', Reward: ', r)
+      # if n_epi % print_interval == 0 and n_epi != 0:
+      #   print(day_target, ': ', action, ', Reward: ', r)
       scores.append(r)
       s = s_prime
     
@@ -126,7 +133,7 @@ def test(global_model):
       print("# of episode :{}, avg score : {:.1f}".format(n_epi, np.mean(scores)))
       scores = []
 
-if __name__ == '__main__':
+def trainModel():
   global_model = ActorCritic()
   global_model.share_memory()
 
@@ -139,4 +146,7 @@ if __name__ == '__main__':
     p.start()
     processes.append(p)
   for p in processes:
-    p.join()
+    p.join()  
+
+if __name__ == '__main__':
+  trainModel()
