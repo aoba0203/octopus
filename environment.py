@@ -38,8 +38,8 @@ class Environment:
       if action == 1:
         df_day = self.df.loc[[day]]
         reward += df_day[df_day[KEY_DATA_TARGET_NUM] == num]['target'].values[0]
-    if reward == 0:
-      reward = -1
+    if reward <= 0:
+      reward = 0.0001
     return reward
   
   def getTargetMean(self):

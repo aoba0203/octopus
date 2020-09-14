@@ -72,7 +72,7 @@ def train(global_model, rank):
         s_prime, r, done = env.step(action)
 
         s_list.append(inputs)
-        a_list.append(a)
+        a_list.append([a])
         r_list.append(r)
 
         s = s_prime
@@ -95,8 +95,8 @@ def train(global_model, rank):
       advantage = td_target - local_model.v(s_batch)
 
       pi = local_model.pi(s_batch)
-      # pi_a = pi.gather(1, a_batch)
-      loss = -(pi * advantage.detach()) + F.smooth_l1_loss(local_model.v(s_batch), td_target.detach())
+      pi_a = pi.gather(1, a_batch)
+      loss = (-torch.log(pi_a) * advantage.detach()) + F.smooth_l1_loss(local_model.v(s_batch), td_target.detach())
       optimizer.zero_grad()
       loss.mean().backward()
       for global_param, local_param in zip(global_model.parameters(), local_model.parameters()):
