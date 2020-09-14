@@ -85,9 +85,9 @@ class TargetInfoProcess:
       print(e)
 
   def write_extra_info_by_list(self, _target_list):
-    cpus = definitions.getNumberOfCore()
-    with Pool(cpus) as p:
-      p.map(self.write_extra_infos, _target_list)
-    # for target_num in _target_list:
-    #   self.write_extra_infos(target_num)
+    # cpus = definitions.getNumberOfCore()
+    # with Pool(cpus) as p:
+    #   p.map(self.write_extra_infos, _target_list)
+    for target_num in _target_list:
+      self.write_extra_infos(target_num)
     

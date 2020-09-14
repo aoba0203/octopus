@@ -4,6 +4,7 @@ from os import makedirs
 from pathlib import Path
 import multiprocessing
 from . import utils
+import numpy as np
 
 KEY_DATA_TARGET_NUM = 'num'
 KEY_DATA_TARGET_NAME = 'target'

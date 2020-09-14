@@ -45,6 +45,6 @@ class DataManager:
   def makeDatasetParallel(self):
     cpus = definitions.getNumberOfCore()
     with Pool(cpus) as p:
-        p.map(__parallel_dataset, self.target_num_list)
+      p.map(__parallel_dataset, self.target_num_list)
 
     

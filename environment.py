@@ -1,6 +1,7 @@
 from data import data_manager as dtm
 from utils.definitions import KEY_DATA_TARGET_NUM, KEY_ACTION_DAY, KEY_ACTION_NUM, KEY_ACTION_VALUE, KEY_DATA_TARGET_NAME
 import random
+import numpy as np
 
 class Environment:
   def __init__(self, _epoch=1):
@@ -37,6 +38,8 @@ class Environment:
       if action > 0.5:
         df_day = self.df.loc[[day]]
         reward += df_day[df_day[KEY_DATA_TARGET_NUM] == num]['target'].values[0]
+    if reward == 0:
+      reward = -1
     return reward
 
   def reset(self):
