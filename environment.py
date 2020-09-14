@@ -41,6 +41,9 @@ class Environment:
     if reward == 0:
       reward = -1
     return reward
+  
+  def getTargetMean(self):
+    return self.df[['target']].mean().values()
 
   def reset(self):
     self.train_count = 0
