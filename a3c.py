@@ -80,7 +80,7 @@ def train(global_model, rank):
           break
       df_target = s[s[KEY_DATA_TARGET_NUM] == num_target]
       df_target = df_target.drop([KEY_DATA_TARGET_NUM], axis=1)
-      if len(list(df_target.values)[0])==0:
+      if len(list(df_target.values))==0:
         break
       inputs = np.array(list(df_target.values)[0])
       s_final = torch.tensor(torch.from_numpy(inputs), dtype=torch.float)

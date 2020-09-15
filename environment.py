@@ -17,11 +17,11 @@ class Environment:
     random.shuffle(list_day)
     return list_day
 
-  def __isDone(self):
-    self.train_count += 1
+  def __isDone(self):    
     return self.train_count > (len(self.list_day) * self.epoch)
 
-  def __getNextState(self):
+  def getNextState(self):
+    self.train_count += 1
     idx = self.train_count % (len(self.list_day))
     day = self.list_day[idx]
     df_day = self.df.loc[[day]]
@@ -31,6 +31,7 @@ class Environment:
 
   def __calcReward(self, _list_dic_action):
     reward = 0
+    modified_reward = 0
     for dic_action in _list_dic_action:
       day = dic_action[KEY_ACTION_DAY]
       num = dic_action[KEY_ACTION_NUM]
@@ -39,19 +40,19 @@ class Environment:
         df_day = self.df.loc[[day]]
         reward += df_day[df_day[KEY_DATA_TARGET_NUM] == num]['target'].values[0]
     if reward <= 0:
-      reward = 0.0001
-    return reward
+      modified_reward = 0.0001
+    return reward, modified_reward
   
   def getTargetMean(self):
     return self.df[['target']].mean().values()
 
   def reset(self):
     self.train_count = 0
-    return self.__getNextState()  
+    return self.getNextState()  
   
   def step(self, _list_dic_action):
-    next_state = self.__getNextState()
-    reward = self.__calcReward(_list_dic_action)
+    next_state = self.getNextState()
+    reward, modified_r = self.__calcReward(_list_dic_action)
     done = self.__isDone()
     
-    return next_state, reward, done
+    return next_state, reward, modified_r, done
