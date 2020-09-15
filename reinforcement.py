@@ -9,8 +9,9 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.distributions import Categorical
 
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.00001
 GAMMA = 0.98
+LOSS = 0
 
 num_target = '000810'
 
@@ -19,10 +20,10 @@ class Policy(nn.Module):
     super(Policy, self).__init__()
     self.data = []
 
-    self.fc1 = nn.Linear(336, 256)
-    # self.fc2 = nn.Linear(512, 1024)
-    # self.fc3 = nn.Linear(1024, 512)
-    # self.fc4 = nn.Linear(512, 256)
+    self.fc1 = nn.Linear(336, 512)
+    self.fc2 = nn.Linear(512, 1024)
+    self.fc3 = nn.Linear(1024, 512)
+    self.fc4 = nn.Linear(512, 256)
     self.fc5 = nn.Linear(256, 64)
     self.fc6 = nn.Linear(64, 8)
     self.fc7 = nn.Linear(8, 2)
@@ -30,9 +31,9 @@ class Policy(nn.Module):
   
   def forward(self, _x):
     x = F.relu(self.fc1(_x))
-    # x = F.relu(self.fc2(x))
-    # x = F.relu(self.fc3(x))
-    # x = F.relu(self.fc4(x))
+    x = F.relu(self.fc2(x))
+    x = F.relu(self.fc3(x))
+    x = F.relu(self.fc4(x))
     x = F.relu(self.fc5(x))
     x = F.relu(self.fc6(x))
     x = F.softmax(self.fc7(x))
@@ -48,16 +49,20 @@ class Policy(nn.Module):
       R = r + (GAMMA * R)
       loss = -torch.log(net) * (R)
       loss.backward()
+      LOSS = loss
     self.optimizer.step()
     self.data = []
 
 def main():
+  use_cuda = torch.cuda.is_available()
+  device = torch.device('cuda:0' if use_cuda else 'cpu')
+
   env = environment.Environment()
   policy = Policy()
-  policy.cuda()
+  policy.cuda(device)
   score = 0.0
   list_score = []
-  print_interval = 1
+  print_interval = 20
 
   for episode in range(10000):
     state = env.reset()
@@ -73,8 +78,10 @@ def main():
         state = env.getNextState()
         continue
       inputs = np.array(list(df_target.values)[0])
+      inputs = torch.from_numpy(inputs).float().to(device)
       day_target = list(df_target.index)[0]
-      prob = policy(torch.from_numpy(inputs).float())
+      # prob = policy(torch.from_numpy(inputs).float())
+      prob = policy(inputs)
       m = Categorical(prob)
       a = m.sample()
       actions.append({KEY_ACTION_DAY: day_target, KEY_ACTION_NUM: num_target, KEY_ACTION_VALUE: a.item()})
@@ -84,7 +91,7 @@ def main():
       state = next_state
     policy.train_net()
     if episode % print_interval == 0 and episode != 0:
-      print('# of episode: {}, avg score: {}'.format(episode, round(np.sum(list_score)/ print_interval, 3)))
+      print('# of episode: {}, avg score: {}, loss: {}'.format(episode, round(np.sum(list_score)/ print_interval, 3)), LOSS)
       list_score = []
   env.close()
 
